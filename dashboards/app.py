@@ -9,7 +9,6 @@ import streamlit as st
 import plotly.express as px  # for interactive charts
 import altair as alt
 import matplotlib.pyplot as plt
-import seaborn as sns
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
