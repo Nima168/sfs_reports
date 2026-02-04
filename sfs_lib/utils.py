@@ -21,13 +21,19 @@ def clean_execution_report(df: pd.DataFrame) -> pd.DataFrame:
         inplace=True,
     )
 
+    # df['Status']=df['Status'].replace('passed','Passed')
+    # df['Status']=df['Status'].replace('failed','Failed')
+
     # Convert datetime columns
-    df["StartTime"] = pd.to_datetime(
-        df["StartTime"], format="%d-%m-%Y %H:%M", errors="coerce"
-    )
-    df["EndTime"] = pd.to_datetime(
-        df["EndTime"], format="%d-%m-%Y %H:%M", errors="coerce"
-    )
+    if  df['StartTime'].str.contains('/').any():
+        df['StartTime']=pd.to_datetime(df['StartTime'], format="%m/%d/%Y %I:%M:%S %p")
+        df['EndTime']=pd.to_datetime(df['EndTime'], format="%m/%d/%Y %I:%M:%S %p")
+
+    else:
+        df["StartTime"] = pd.to_datetime(df["StartTime"], format="%d-%m-%Y %H:%M", errors="coerce")
+        df["EndTime"] = pd.to_datetime(df["EndTime"], format="%d-%m-%Y %H:%M", errors="coerce")
+
+
 
     # Convert elapsed time (seconds → HH:MM:SS)
     df["ElapsedTime"] = pd.to_timedelta(

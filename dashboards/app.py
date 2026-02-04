@@ -162,23 +162,33 @@ with tab2:
     status_df = status_counts.reset_index()
     status_df.columns = ["Status", "Count"]
 
+
     # Donut chart
     fig_donut = px.pie(
         status_df,
         names="Status",
         values="Count",
         color="Status",
-        color_discrete_map={"Passed": "green", "Failed": "red"},
+        color_discrete_map={"passed": "green", "failed": "red"},
         hole=0.5,  # creates the donut hole
         title="Passed vs Failed"
     )
 
     fig_donut.update_traces(
-        textinfo="percent+label",  # show both percent and label
+        textinfo="percent+label",
+        texttemplate="%{percent} %{label}",
         hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Percentage: %{percent}"
     )
 
-    fig_donut.update_layout(height=350, margin=dict(t=50, b=50))
+    # Capitalize legend + slice labels (display only)
+    fig_donut.for_each_trace(
+        lambda t: t.update(
+            labels=[lbl.capitalize() for lbl in t.labels],
+            name=t.name.capitalize()
+        )
+    )    
+    
+    fig_donut.update_layout(height=350, margin=dict(t=25, b=25))
 
     st.plotly_chart(fig_donut, use_container_width=True)
     st.divider()
@@ -186,15 +196,23 @@ with tab2:
     # ---------------- FILTERS ----------------
     st.write("### ⚙️ Filter / Explore Test Cases")
 
-    # Status filter
-    status_options = ['passed', 'failed']
-    selected_status = st.multiselect(
+    # Status filter (UI labels mapped to actual values)
+    status_label_map = {
+        "Passed": "passed",
+        "Failed": "failed"
+    }
+
+    selected_labels = st.multiselect(
         "Select Status to analyze",
-        options=status_options,
-        default=status_options
+        options=list(status_label_map.keys()),
+        default=list(status_label_map.keys())
     )
 
-    # Top N slider
+    # Convert selected UI labels back to dataframe values
+    selected_status = [status_label_map[label] for label in selected_labels]
+
+
+        # Top N slider
     top_n = st.slider("Show Top N slowest test cases", min_value=5, max_value=300, value=15, step=20)
 
     # Filter dataframe
